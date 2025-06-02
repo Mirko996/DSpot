@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: dspot
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/dspot?useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  profiles:
+    active: dev
+
+  devtools:
+    restart:
+      enabled: true
+
+server:
+  port: 8080
+
+# Enable actuator endpoints (optional)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

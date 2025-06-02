@@ -1,0 +1,36 @@
+# Maven
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# Logs
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.jar
+*.war
+
+# Tests
+/test-output/
+
+# Database
+*.mv.db
+*.h2.db
+
+# DBRider YAML datasets (optional: remove if you want them committed)
+# src/test/resources/datasets/
+
+# Environment
+.env
+application-local.yml
