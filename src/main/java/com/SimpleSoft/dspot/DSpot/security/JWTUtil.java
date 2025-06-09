@@ -16,14 +16,19 @@ public class JWTUtil {
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final long expirationMs = 86400000; // 1 day
 
-    public String generateToken(String email, Role role) {
+    public String generateToken(String email, Role role, Long distributorId) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role.name())
+                .claim("distributorId", distributorId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key)
                 .compact();
+    }
+
+    public Long getDistributorIdFromToken(String token) {
+        return parseClaims(token).get("distributorId", Long.class);
     }
 
     public String getEmailFromToken(String token) {

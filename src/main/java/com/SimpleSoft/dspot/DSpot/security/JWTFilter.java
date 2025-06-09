@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -33,12 +33,12 @@ public class JWTFilter extends OncePerRequestFilter {
                 if (jwtUtil.isTokenValid(token)) {
                     String email = jwtUtil.getEmailFromToken(token);
                     String role = jwtUtil.getRoleFromToken(token);
+                    Long distributorId = jwtUtil.getDistributorIdFromToken(token);
 
-                    var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+                    var authorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_" + role), new SimpleGrantedAuthority("DISTRIBUTOR_" + distributorId.toString()));
 
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(email, null, authorities);
-
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (JwtException e) {

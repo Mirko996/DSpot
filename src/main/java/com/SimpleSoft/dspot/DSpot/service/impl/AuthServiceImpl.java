@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse login(LoginRequest request) {
         User user = validateLoginRequest(request);
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getDistributor().getId());
         return new LoginResponse(token, user.getEmail(), user.getRole());
     }
 
