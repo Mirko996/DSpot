@@ -13,4 +13,6 @@ public interface OrderService {
     Page<OrderResponse> getOrdersForCurrentUser(int page, int size);
 
     OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus);
+
+    Page<OrderResponse> getOrdersFiltered(OrderStatus status, int page, int size);
 }

@@ -53,4 +53,16 @@ public class ProductController {
         productService.setProductVisibility(id, hidden);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping
+    public ResponseEntity<Page<ProductResponse>> listProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean inStock
+    ) {
+        Page<ProductResponse> products = productService.listProducts(page, size, search, inStock);
+        return ResponseEntity.ok(products);
+    }
+
 }

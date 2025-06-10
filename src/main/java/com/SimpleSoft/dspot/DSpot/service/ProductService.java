@@ -15,7 +15,9 @@ public interface ProductService {
 
     void deleteProduct(Long id);
 
-    public void setProductVisibility(Long productId, boolean hidden);
+    void setProductVisibility(Long productId, boolean hidden);
+
+    Page<ProductResponse> listProducts(int page, int size, String search, Boolean inStock);
 
     default ProductResponse toResponse(Product p) {
         return new ProductResponse(

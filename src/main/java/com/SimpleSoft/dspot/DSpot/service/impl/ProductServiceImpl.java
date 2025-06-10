@@ -61,6 +61,29 @@ public class ProductServiceImpl implements ProductService {
         return productPage.map(this::toResponse);
     }
 
+    public Page<ProductResponse> listProducts(int page, int size, String search, Boolean inStock) {
+        Long distributorId = AuthUtils.getCurrentDistributorId();
+        String role = AuthUtils.getCurrentUserRole();
+
+        Distributor distributor = distributorRepository.findById(distributorId)
+                .orElseThrow(() -> new ServiceException("Distributor not found"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+
+        boolean includeHidden = "ADMIN".equalsIgnoreCase(role);
+
+        Page<Product> products = productRepository.searchProducts(
+                distributor,
+                search != null && !search.isBlank() ? search : null,
+                inStock,
+                includeHidden,
+                pageable
+        );
+
+        return products.map(this::toResponse);
+    }
+
+
     @Override
     public ProductResponse updateProduct(Long id, UpdateProductRequest request) {
         Long distributorId = AuthUtils.getCurrentDistributorId();

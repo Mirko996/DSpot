@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,7 +143,33 @@ public class OrderServiceImpl implements com.SimpleSoft.dspot.DSpot.service.Orde
         return toResponse(order);
     }
 
+    public Page<OrderResponse> getOrdersFiltered(OrderStatus status, int page, int size) {
+        Long distributorId = AuthUtils.getCurrentDistributorId();
+        String email = AuthUtils.getCurrentUserEmail();
+        String role = AuthUtils.getCurrentUserRole();
 
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ServiceException("User not found"));
+
+        Distributor distributor = distributorRepository.findById(distributorId)
+                .orElseThrow(() -> new ServiceException("Distributor not found"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        User storeUser = null;
+        User salesRep = null;
+
+        switch (role) {
+            case "RETAIL_STORE" -> storeUser = user;
+            case "SALES_REP" -> salesRep = user;
+            case "ADMIN" -> {} // leave both null to get all
+            default -> throw new ServiceException("Access denied");
+        }
+
+        Page<Order> orders = orderRepository.searchOrders(distributor, storeUser, salesRep, status, pageable);
+
+        return orders.map(this::toResponse);
+    }
 
     private OrderResponse toResponse(Order order) {
         List<OrderItemResponse> itemResponses = order.getItems().stream()

@@ -40,4 +40,19 @@ public class OrderController {
         OrderResponse response = orderService.updateOrderStatus(id, newStatus);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping
+    public ResponseEntity<Page<OrderResponse>> getOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        OrderStatus parsedStatus = null;
+        if (status != null && !status.isBlank()) {
+            parsedStatus = OrderStatus.valueOf(status.toUpperCase());
+        }
+
+        Page<OrderResponse> orders = orderService.getOrdersFiltered(parsedStatus, page, size);
+        return ResponseEntity.ok(orders);
+    }
 }
