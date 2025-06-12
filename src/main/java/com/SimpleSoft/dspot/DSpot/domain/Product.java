@@ -39,6 +39,9 @@ public class Product {
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
+    @Column(name = "reserved_stock_quantity", nullable = false)
+    private Integer reservedStockQuantity = 0;
+
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden = false;
 

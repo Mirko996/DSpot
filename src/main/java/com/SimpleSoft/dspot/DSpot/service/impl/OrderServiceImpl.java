@@ -11,6 +11,7 @@ import com.SimpleSoft.dspot.DSpot.repository.OrderRepository;
 import com.SimpleSoft.dspot.DSpot.repository.ProductRepository;
 import com.SimpleSoft.dspot.DSpot.repository.UserRepository;
 import com.SimpleSoft.dspot.DSpot.security.AuthUtils;
+import com.SimpleSoft.dspot.DSpot.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,8 +29,8 @@ public class OrderServiceImpl implements com.SimpleSoft.dspot.DSpot.service.Orde
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
     private final DistributorRepository distributorRepository;
+    private final ProductService productService;
 
     @Transactional
     @Override
@@ -56,9 +57,7 @@ public class OrderServiceImpl implements com.SimpleSoft.dspot.DSpot.service.Orde
                 .build();
 
         List<OrderItem> orderItems = request.getProducts().stream().map(itemReq -> {
-            Product product = productRepository.findById(itemReq.getProductId())
-                    .orElseThrow(() -> new ServiceException("Product not found: " + itemReq.getProductId()));
-
+        Product product = productService.reserveProductStock(itemReq.getProductId(), itemReq.getQuantity());
             return OrderItem.builder()
                     .order(order)
                     .product(product)

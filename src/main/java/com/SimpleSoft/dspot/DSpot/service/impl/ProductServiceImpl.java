@@ -1,6 +1,7 @@
 package com.SimpleSoft.dspot.DSpot.service.impl;
 
 import com.SimpleSoft.dspot.DSpot.domain.Distributor;
+import com.SimpleSoft.dspot.DSpot.domain.OrderItem;
 import com.SimpleSoft.dspot.DSpot.domain.Product;
 import com.SimpleSoft.dspot.DSpot.dto.product.CreateProductRequest;
 import com.SimpleSoft.dspot.DSpot.dto.product.ProductResponse;
@@ -10,9 +11,12 @@ import com.SimpleSoft.dspot.DSpot.repository.DistributorRepository;
 import com.SimpleSoft.dspot.DSpot.repository.ProductRepository;
 import com.SimpleSoft.dspot.DSpot.security.AuthUtils;
 import com.SimpleSoft.dspot.DSpot.service.ProductService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +87,50 @@ public class ProductServiceImpl implements ProductService {
         return products.map(this::toResponse);
     }
 
+    @Transactional
+    public Product reserveProductStock(Long productId, int quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ServiceException("Product not found: " + productId));
+
+        if (product.getStockQuantity() < quantity)
+            throw new ServiceException("Insufficient stock for product: " + product.getName());
+
+        product.setReservedStockQuantity(product.getReservedStockQuantity() + quantity);
+        productRepository.save(product);
+        return product;
+    }
+
+    @Transactional
+    public void finalizeDeliveryStock(List<OrderItem> items) {
+        for (OrderItem item : items) {
+            Product product = item.getProduct();
+            int qty = item.getQuantity();
+
+            if (product.getReservedStockQuantity() < qty) {
+                throw new ServiceException("Reserved stock mismatch for product: " + product.getName());
+            }
+
+            product.setReservedStockQuantity(product.getReservedStockQuantity() - qty);
+            product.setStockQuantity(product.getStockQuantity() - qty);
+
+            productRepository.save(product);
+        }
+    }
+
+    @Transactional
+    public void releaseReservedStock(List<OrderItem> items) {
+        for (OrderItem item : items) {
+            Product product = item.getProduct();
+            int qty = item.getQuantity();
+
+            if (product.getReservedStockQuantity() < qty) {
+                throw new ServiceException("Reserved stock underflow for product: " + product.getName());
+            }
+
+            product.setReservedStockQuantity(product.getReservedStockQuantity() - qty);
+            productRepository.save(product);
+        }
+    }
 
     @Override
     public ProductResponse updateProduct(Long id, UpdateProductRequest request) {
